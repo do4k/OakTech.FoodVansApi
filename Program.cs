@@ -25,13 +25,25 @@ app.MapGet("/", () =>
     var html = new HtmlWeb();
     var doc = html.Load("https://www.buoyevents.co.uk/markets/harbourside-street-food-market/");
 
-    var vendors = doc.DocumentNode.SelectNodes("//div[@data-date='" + formatted + "']")
-        .SelectMany(node => node.SelectNodes(".//h4[@class='link']"))
-        .Select(node => node.InnerText.Trim())
-        .Distinct()
-        .Select(WebUtility.HtmlDecode);
+    var todaysTradersDiv = doc.DocumentNode.SelectNodes("//div[@data-date='" + formatted + "']");
+    if (todaysTradersDiv is null)
+    {
+        return [];
+    }
+    
+    var vendors = todaysTradersDiv
+        .SelectMany(node => node.SelectNodes(".//a[contains(@class, 'grid-link')]") ?? Enumerable.Empty<HtmlNode>())
+        .ToList();
+    
+    var vendorsDto = vendors.Select(x =>
+        new 
+        {
+            Link = x.Attributes["href"].Value,
+            Name = WebUtility.HtmlDecode(x.SelectSingleNode(".//h4[@class='link']")?.InnerText.Trim())
+        }
+    );
 
-    return vendors;
+    return vendorsDto.Distinct();
 });
 
 app.Run();
