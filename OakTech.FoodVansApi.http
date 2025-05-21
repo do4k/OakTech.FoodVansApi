@@ -1,0 +1,6 @@
+@OakTech.FoodVansApi_HostAddress = http://localhost:8042
+
+GET {{OakTech.FoodVansApi_HostAddress}}/
+Accept: application/json
+
+###
