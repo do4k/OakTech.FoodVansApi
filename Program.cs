@@ -20,7 +20,7 @@ app.UseHttpsRedirection();
 app.MapGet("/", () =>
 {
     var today = DateTime.Today;
-    var formatted = $"{today:dddd} {today:dd}{(today.Day % 10 == 1 && today.Day != 11 ? "st" : today.Day % 10 == 2 && today.Day != 12 ? "nd" : today.Day % 10 == 3 && today.Day != 13 ? "rd" : "th")} {today:MMMM} {today:yyyy}";
+    var formatted = $"{today:dddd} {today.Day}{(today.Day % 10 == 1 && today.Day != 11 ? "st" : today.Day % 10 == 2 && today.Day != 12 ? "nd" : today.Day % 10 == 3 && today.Day != 13 ? "rd" : "th")} {today:MMMM} {today:yyyy}";
 
     var html = new HtmlWeb();
     var doc = html.Load("https://www.buoyevents.co.uk/markets/harbourside-street-food-market/");
