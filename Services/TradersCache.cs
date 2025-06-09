@@ -21,7 +21,7 @@ public class TradersCache(ITradersService tradersService, ILogger<TradersCache> 
         {
             logger.LogDebug("Cache miss for key: {Key}", key);
             var fromService = await tradersService.GetTradersAsync(date);
-            _traders = fromService.Match(traders => traders, _ => _traders);
+            _traders = fromService.Match(traders => traders, _ => new Traders([], key));
         }
         else
         {
