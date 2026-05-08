@@ -25,6 +25,25 @@ host.Services.UseScheduler(scheduler =>
 });
 
 var logger = host.Services.GetRequiredService<ILogger<Program>>();
-logger.LogInformation("FoodVanSlackNotifier scheduled to run daily at 8:00 AM on weekdays");
+var nextRun = GetNextWeekdayMorningRun();
+logger.LogInformation("FoodVanSlackNotifier scheduled to run daily at 8:00 AM on weekdays. Next run: {NextRun}", nextRun);
 
 host.Run();
+
+static DateTime GetNextWeekdayMorningRun()
+{
+    var now = DateTime.Now;
+    var today = now.Date.AddHours(8);
+    
+    if (today > now && today.DayOfWeek != DayOfWeek.Saturday && today.DayOfWeek != DayOfWeek.Sunday)
+        return today;
+    
+    for (int i = 1; i <= 7; i++)
+    {
+        var day = now.Date.AddDays(i);
+        if (day.DayOfWeek != DayOfWeek.Saturday && day.DayOfWeek != DayOfWeek.Sunday)
+            return day.AddHours(8);
+    }
+    
+    return today;
+}
