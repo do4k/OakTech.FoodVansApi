@@ -1,4 +1,6 @@
+using System.Reflection;
 using Coravel;
+using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,6 +19,8 @@ builder.Services.AddScheduler();
 builder.Services.AddTransient<FoodVanSlackNotifierJob>();
 
 var host = builder.Build();
+var logger = host.Services.GetRequiredService<ILogger<Program>>();
+
 host.Services.UseScheduler(scheduler =>
 {
     scheduler.Schedule<FoodVanSlackNotifierJob>()
@@ -24,26 +28,42 @@ host.Services.UseScheduler(scheduler =>
         .Weekday();
 });
 
-var logger = host.Services.GetRequiredService<ILogger<Program>>();
-var nextRun = GetNextWeekdayMorningRun();
-logger.LogInformation("FoodVanSlackNotifier scheduled to run daily at 8:00 AM on weekdays. Next run: {NextRun}", nextRun);
+var scheduler = host.Services.GetRequiredService<IScheduler>();
+LogAllScheduledTasks(scheduler, logger);
 
 host.Run();
 
-static DateTime GetNextWeekdayMorningRun()
+void LogAllScheduledTasks(IScheduler scheduler, ILogger logger)
 {
-    var now = DateTime.Now;
-    var today = now.Date.AddHours(8);
+    var schedulerType = scheduler.GetType();
+    var tasksField = schedulerType.GetField("_tasks", BindingFlags.NonPublic | BindingFlags.Instance);
     
-    if (today > now && today.DayOfWeek != DayOfWeek.Saturday && today.DayOfWeek != DayOfWeek.Sunday)
-        return today;
-    
-    for (int i = 1; i <= 7; i++)
+    if (tasksField == null)
     {
-        var day = now.Date.AddDays(i);
-        if (day.DayOfWeek != DayOfWeek.Saturday && day.DayOfWeek != DayOfWeek.Sunday)
-            return day.AddHours(8);
+        logger.LogWarning("Could not find _tasks field on scheduler");
+        return;
     }
-    
-    return today;
+
+    var tasks = tasksField.GetValue(scheduler) as System.Collections.Concurrent.ConcurrentDictionary<string, object>;
+    if (tasks == null)
+    {
+        logger.LogWarning("Could not get tasks from scheduler");
+        return;
+    }
+
+    foreach (var kvp in tasks)
+    {
+        logger.LogInformation("Scheduled task: {Name}", kvp.Key);
+        
+        var scheduledTaskType = kvp.Value.GetType();
+        var scheduledEventField = scheduledTaskType.GetField("ScheduledEvent", BindingFlags.NonPublic | BindingFlags.Instance);
+        var scheduledEvent = scheduledEventField?.GetValue(kvp.Value);
+        
+        if (scheduledEvent != null)
+        {
+            var dueAtProperty = scheduledEvent.GetType().GetProperty("DueAt");
+            var dueAt = dueAtProperty?.GetValue(scheduledEvent);
+            logger.LogInformation("  DueAt: {DueAt}", dueAt);
+        }
+    }
 }
