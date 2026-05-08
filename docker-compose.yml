@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: src/OakTech.FoodVansApi/Dockerfile
     ports:
-      - "8080:8080"
+      - "8042:8080"
 
   slack-notifier:
     build:
