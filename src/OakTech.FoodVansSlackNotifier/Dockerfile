@@ -7,8 +7,10 @@ WORKDIR /src
 COPY ["src/OakTech.FoodVansSlackNotifier/OakTech.FoodVansSlackNotifier.csproj", "src/OakTech.FoodVansSlackNotifier/"]
 COPY ["src/OakTech.FoodVansLib/OakTech.FoodVansLib.csproj", "src/OakTech.FoodVansLib/"]
 RUN dotnet restore "src/OakTech.FoodVansSlackNotifier/OakTech.FoodVansSlackNotifier.csproj"
-COPY . .
-WORKDIR "/src/OakTech.FoodVansSlackNotifier"
+COPY src/OakTech.FoodVansSlackNotifier ./src/OakTech.FoodVansSlackNotifier
+COPY src/OakTech.FoodVansLib ./src/OakTech.FoodVansLib
+COPY src/OakTech.FoodVansApi ./src/OakTech.FoodVansApi
+WORKDIR "/src/src/OakTech.FoodVansSlackNotifier"
 RUN dotnet build "OakTech.FoodVansSlackNotifier.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish

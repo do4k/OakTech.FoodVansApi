@@ -9,8 +9,9 @@ WORKDIR /src
 COPY ["src/OakTech.FoodVansApi/OakTech.FoodVansApi.csproj", "src/OakTech.FoodVansApi/"]
 COPY ["src/OakTech.FoodVansLib/OakTech.FoodVansLib.csproj", "src/OakTech.FoodVansLib/"]
 RUN dotnet restore "src/OakTech.FoodVansApi/OakTech.FoodVansApi.csproj"
-COPY . .
-WORKDIR "/src/OakTech.FoodVansApi"
+COPY src/OakTech.FoodVansApi ./src/OakTech.FoodVansApi
+COPY src/OakTech.FoodVansLib ./src/OakTech.FoodVansLib
+WORKDIR "/src/src/OakTech.FoodVansApi"
 RUN dotnet build "OakTech.FoodVansApi.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
