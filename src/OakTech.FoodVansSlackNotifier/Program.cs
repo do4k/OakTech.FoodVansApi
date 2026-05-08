@@ -1,6 +1,7 @@
 using Coravel;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using OakTech.FoodVansLib.Services;
 using OakTech.FoodVansSlackNotifier;
 
@@ -15,12 +16,13 @@ builder.Services.AddScheduler();
 builder.Services.AddTransient<FoodVanSlackNotifierJob>();
 
 var host = builder.Build();
+var logger = host.Services.GetRequiredService<ILogger<Coravel.Scheduling.Schedule.Interfaces.IScheduler>>();
 host.Services.UseScheduler(scheduler =>
 {
     scheduler.Schedule<FoodVanSlackNotifierJob>()
         .DailyAt(8, 0)
         .Weekday();
 })
-.LogScheduledTaskProgress();
+.LogScheduledTaskProgress(logger);
 
 host.Run();
