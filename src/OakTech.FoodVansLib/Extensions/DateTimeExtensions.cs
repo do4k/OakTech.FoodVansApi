@@ -1,4 +1,4 @@
-namespace OakTech.FoodVansApi.Extensions;
+namespace OakTech.FoodVansLib.Extensions;
 
 public static class DateTimeExtensions
 {

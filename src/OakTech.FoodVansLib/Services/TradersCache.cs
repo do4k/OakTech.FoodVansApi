@@ -1,8 +1,9 @@
-using OakTech.FoodVansApi.Extensions;
-using OakTech.FoodVansApi.Models;
+using Microsoft.Extensions.Logging;
+using OakTech.FoodVansLib.Extensions;
+using OakTech.FoodVansLib.Models;
 using OneOf.Types;
 
-namespace OakTech.FoodVansApi.Services;
+namespace OakTech.FoodVansLib.Services;
 
 public interface ITradersCache
 {

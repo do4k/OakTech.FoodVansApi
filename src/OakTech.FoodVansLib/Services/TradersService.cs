@@ -1,12 +1,13 @@
 using System.Net;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OakTech.FoodVansApi.Extensions;
-using OakTech.FoodVansApi.Models;
-using OakTech.FoodVansApi.Options;
+using OakTech.FoodVansLib.Extensions;
+using OakTech.FoodVansLib.Models;
+using OakTech.FoodVansLib.Options;
 using OneOf.Types;
 
-namespace OakTech.FoodVansApi.Services;
+namespace OakTech.FoodVansLib.Services;
 
 public interface ITradersService
 {

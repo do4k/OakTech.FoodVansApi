@@ -1,4 +1,4 @@
-namespace OakTech.FoodVansApi.Options;
+namespace OakTech.FoodVansLib.Options;
 
 public class FoodVanOptions
 {

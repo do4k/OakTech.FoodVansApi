@@ -1,0 +1,14 @@
+services:
+  food-vans-api:
+    build:
+      context: .
+      dockerfile: src/OakTech.FoodVansApi/Dockerfile
+    ports:
+      - "8080:8080"
+
+  slack-notifier:
+    build:
+      context: .
+      dockerfile: src/OakTech.FoodVansSlackNotifier/Dockerfile
+    env_file:
+      - .env
