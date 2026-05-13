@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json.Serialization;
 using Coravel.Invocable;
 using Microsoft.Extensions.Logging;
 using OakTech.FoodVansLib.Services;
@@ -6,7 +7,7 @@ using OakTech.FoodVansLib.Models;
 
 namespace OakTech.FoodVansSlackNotifier;
 
-public record SlackMessage(string Text);
+public record SlackMessage([property: JsonPropertyName("message")] string Message);
 public record SlackWebhookUrl(string Value);
 
 public class FoodVanSlackNotifierJob : IInvocable
@@ -62,7 +63,8 @@ public class FoodVanSlackNotifierJob : IInvocable
         }
         else
         {
-            _logger.LogError("Failed to send Slack message. Status: {StatusCode}", result.StatusCode);
+            var errorBody = await result.Content.ReadAsStringAsync();
+            _logger.LogError("Failed to send Slack message. Status: {StatusCode}, Body: {Body}", result.StatusCode, errorBody);
         }
     }
 }
