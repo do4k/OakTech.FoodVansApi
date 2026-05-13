@@ -10,5 +10,7 @@ services:
     build:
       context: .
       dockerfile: src/OakTech.FoodVansSlackNotifier/Dockerfile
+    ports:
+      - "8043:8080"
     env_file:
       - .env

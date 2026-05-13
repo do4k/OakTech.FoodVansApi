@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json;
 using Coravel;
 using Coravel.Scheduling.Schedule.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using OakTech.FoodVansLib.Services;
 using OakTech.FoodVansSlackNotifier;
 
-var builder = Host.CreateApplicationBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLogging(logging => logging.AddConsole().SetMinimumLevel(LogLevel.Debug));
 builder.Services.AddSingleton(new SlackWebhookUrl(builder.Configuration["SlackWebhookPath"] ?? ""));
@@ -18,20 +19,28 @@ builder.Services.AddSingleton<ITradersService, TradersService>();
 builder.Services.AddScheduler();
 builder.Services.AddTransient<FoodVanSlackNotifierJob>();
 
-var host = builder.Build();
-var logger = host.Services.GetRequiredService<ILogger<Program>>();
+var app = builder.Build();
 
-host.Services.UseScheduler(scheduler =>
+app.Services.UseScheduler(scheduler =>
 {
     scheduler.Schedule<FoodVanSlackNotifierJob>()
         .DailyAt(8, 0)
         .Weekday();
 });
 
-var scheduler = host.Services.GetRequiredService<IScheduler>();
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+var scheduler = app.Services.GetRequiredService<IScheduler>();
 LogAllScheduledTasks(scheduler, logger);
 
-host.Run();
+app.MapPost("/notify", async (ILogger<Program> log) =>
+{
+    log.LogInformation("Manual trigger of food van notification");
+    var job = app.Services.GetRequiredService<FoodVanSlackNotifierJob>();
+    await job.Invoke();
+    return Results.Ok("Notification job completed");
+});
+
+app.Run();
 
 void LogAllScheduledTasks(IScheduler scheduler, ILogger logger)
 {
